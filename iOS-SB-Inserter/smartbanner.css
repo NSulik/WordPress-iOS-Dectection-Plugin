@@ -1,0 +1,12 @@
+#smartbanner {
+	background-image:url(smartbanner-bg.png); 
+	background-repeat:repeat-x;
+	margin:0px;
+}
+
+#viewbutton {
+	position:relative;
+	top:30px;
+	float:right;
+	right:10px;
+}

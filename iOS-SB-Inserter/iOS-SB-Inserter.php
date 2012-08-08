@@ -1,6 +1,6 @@
 <?php
 /*
-Plugin Name: iOS-SmartBanner-Inserter
+Plugin Name: iOS SmartBanner Inserter
 Plugin URI: None
 Description: The plugin determins whether the user is running iOS 6, iOS 5 or any other operating system. Depending on the result it inserts a smart banner, simulates a smart banner or does nothing respectively.
 Version: 1.0
@@ -92,31 +92,47 @@ function is_iOS() {
 		return false;
 }
 
-//Returns true if user is using an iOS 5.x device
-function is_iOS5() {
-
-	if(is_iOS() && stripos($_SERVER['HTTP_USER_AGENT'], "os 5"))
-		return true;
-	else
-		return false;
+//Returns true if user is using an iOS $version device.
+//$version is the string format of the iOS version (e.g. 4.2.1 would be "4_2_1").
+//If version 5.x is to be detected then "5" is all that is needed
+function is_iOSVersion($version) {
+	if(is_string($version)) {
+		if(is_iOS() && stripos($_SERVER['HTTP_USER_AGENT'], "os ".$version))
+			return true;
+		else
+			return false;
+	}else
+		 throw new Exception('Version not in String format.');
 }
 
-//Returns true if user is using an iOS 6.x device
-function is_iOS6() {
-	if(is_iOS() && stripos($_SERVER['HTTP_USER_AGENT'], "os 6"))
-		return true;
-	else
-		return false;
-}
 
 /*------------------------------------------------------------------
 iOS SmartBanner Inserter Callback Function
+Inserts the 
 ------------------------------------------------------------------*/
 
 function insert_SmartBanner() {
-	if(is_iOS6())
-		echo '<meta name="apple-itunes-app" content="app-id=123456789, app-argument=x-sfp:///visit/seal-rocks">';
-	else if(is_iOS5())
-		echo "iOS 5.x Detected";
+	try {
+		if(is_iOSVersion("6"))
+			echo '<meta name="apple-itunes-app" content="app-id='.get_option('ad_app_id').', app-argument=x-sfp:///visit/seal-rocks">';
+		else if(is_iOSVersion("5"))
+			iOS5_SmartBanner_Simulation();
+	} catch (Exception $e) {
+		echo $e->getMessage();
+	}
+}
+
+/*------------------------------------------------------------------
+iOS SmartBanner Simulator
+------------------------------------------------------------------*/
+function iOS5_SmartBanner_Simulation() {
+	?>
+			<link rel="stylesheet" type="text/css" href="./wp-content/plugins/iOS-SB-Inserter/smartbanner.css" />
+			<table width="100%" height="100px" id="smartbanner">
+				<tr>
+					<td > <a href="itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/viewSoftware?id=<?php echo get_option('ad_app_id')?>&mt=8" target="itunes_store" ><img src="./wp-content/plugins/iOS-SB-Inserter/view-button.png" id="viewbutton"></a> </td>
+				</tr>
+			</table>
+	<?php
 }
 ?>
